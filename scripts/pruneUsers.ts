@@ -1,27 +1,21 @@
 const fs = require('fs')
 
 async function pruneUsers() {
-    let fallUsers = JSON.parse(await fs.readFileSync('data/fallUsers.json'));
-    let winterUsers = JSON.parse(await fs.readFileSync('data/winterUsers.json'));
 
-    let repeatUsers = 0;
-    let uniqueUsers = 0;
+    let deploymentBlocks = [2804761,2862668,2950246,3068748,3078978,3106205,3283501,3327307,3357919,3395391,3648868, 3766081, 3913760];
 
-    let uniqueWinterUsers: string[] = new Array();
+    let users: string[] = new Array();
 
-    for (const user of winterUsers) {
-        if (fallUsers.indexOf(user) == -1) {
-            uniqueUsers += 1;
-            uniqueWinterUsers.push(user);
-        } else {
-            repeatUsers +=1
-        }
+    for (let i = 0; i < deploymentBlocks.length; i++) {
+        let newUsers = JSON.parse(await fs.readFileSync('data/users_v' + deploymentBlocks[i] + '.json'));
+        console.log(newUsers);
+        newUsers.forEach((user: string) => {
+            if(users.indexOf(user) === -1) users.push(user);
+        });
     }
 
-    console.log(repeatUsers);
-    console.log(uniqueUsers);
-
-    fs.writeFileSync('data/uniqueWinterUsers.json', JSON.stringify(uniqueWinterUsers));
+    console.log(users.length);
+    fs.writeFileSync('data/finalUsers.json', JSON.stringify(users));
 }
 
 pruneUsers().catch(e => {

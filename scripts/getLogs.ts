@@ -5,14 +5,10 @@ const fs = require('fs')
 
 export async function getLogs(intrfc: any, topic: string, contractAddr: string, startBlock: number, endBlock:number) {
 
-  let cutOffBlock = 3388314;
-
-  let fallUsers: string[] = new Array();
-  let winterUsers: string[] = new Array();
+  let users: string[] = new Array();
 
   try {
-    fallUsers = JSON.parse(await fs.readFileSync('data/fallUsers.json'));
-    winterUsers = JSON.parse(await fs.readFileSync('data/winterUsers.json'));
+    users = JSON.parse(await fs.readFileSync('data/users.json'));
   } catch (e) {
     console.log('Files not found');
   }
@@ -31,9 +27,6 @@ export async function getLogs(intrfc: any, topic: string, contractAddr: string, 
         chainId: providerRPC.moonbase.chainId,
         name: providerRPC.moonbase.name,
   });
-
-  console.log(startBlock);
-  console.log(endBlock);
 
   if (endBlock == 0) {
     endBlock = await provider.getBlockNumber();
@@ -80,24 +73,10 @@ export async function getLogs(intrfc: any, topic: string, contractAddr: string, 
   for (const log of rawLogs) {
     let parsedLog = intrfc.parseLog(log);
 
-    let user = "";
+    let user = parsedLog.args[2];
 
-    if (startBlock > 3106205) {
-      user = parsedLog.args[2];
-    } else {
-      user = parsedLog.args[1];
-    }
-
-    console.log(log);
-    let block = JSON.parse(JSON.stringify(log)).blockNumber;
-
-    if (block < cutOffBlock) {
-      if(fallUsers.indexOf(user) === -1) fallUsers.push(user);
-    }else{
-      if(winterUsers.indexOf(user) === -1) winterUsers.push(user);
-    }
+    if(users.indexOf(user) === -1) users.push(user);
   }
 
-  fs.writeFileSync('data/fallUsers.json', JSON.stringify(fallUsers));
-  fs.writeFileSync('data/winterUsers.json', JSON.stringify(winterUsers));
+  fs.writeFileSync('data/users_v' + startBlock + '.json', JSON.stringify(users));
 }
