@@ -79,4 +79,5 @@ export async function getLogs(intrfc: any, topic: string, contractAddr: string, 
   }
 
   fs.writeFileSync('data/users_v' + startBlock + '.json', JSON.stringify(users));
+  fs.writeFileSync('data/lastBlock.txt', endBlock.toString());
 }
